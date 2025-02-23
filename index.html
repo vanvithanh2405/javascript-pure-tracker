@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Javascript Pure Tracker</title>
+	<script src="https://unpkg.com/@tailwindcss/browser@4"></script>
+
+	<link rel="stylesheet" href="./assets/css/index.css" />
+</head>
+<body>
+	<div class="min-h-screen sm:px-6 lg:px-8">
+		<div class="mt-8 sm:mx-auto sm:w-full">
+			<form id="trackerForm">
+				<div>
+						<label for="description" class="block text-sm font-medium leading-5 text-gray-700">Description</label>
+						<div class="mt-1 relative rounded-md shadow-sm">
+								<input id="description" name="description" placeholder="John Doe" type="text" required
+										class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:shadow-outline-blue focus:border-blue-300 transition duration-150 ease-in-out sm:text-sm sm:leading-5">
+								<div class="hidden absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+										<svg class="h-5 w-5 text-red-500" fill="currentColor" viewBox="0 0 20 20">
+												<path fill-rule="evenodd"
+														d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+														clip-rule="evenodd">
+												</path>
+										</svg>
+								</div>
+						</div>
+				</div>
+
+				<div class="my-3">
+					<label for="email" class="block text-sm font-medium leading-5  text-gray-700">Author</label>
+					<div class="mt-1 relative rounded-md shadow-sm">
+						<input id="author" name="author" placeholder="John Doe" type="text" required
+								class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:shadow-outline-blue focus:border-blue-300 transition duration-150 ease-in-out sm:text-sm sm:leading-5">
+						<div class="hidden absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+							<svg class="h-5 w-5 text-red-500" fill="currentColor" viewBox="0 0 20 20">
+								<path fill-rule="evenodd"
+										d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+										clip-rule="evenodd">
+								</path>
+							</svg>
+						</div>
+					</div>
+				</div>
+
+				<label for="severity" class="block mb-2 text-sm font-medium text-gray-900">Severity</label>
+				<select id="severity" required class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+					<option value="low">Low</option>
+					<option value="medium">Medium</option>
+					<option value="hard">Hard</option>
+				</select>
+
+				<div class="text-right my-3">
+					<button type="submit" class="text-white cursor-pointer bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5">Submit</button>
+				</div>
+			</form>
+		</div>
+
+		<div id="trackerList"></div>
+	</div>
+
+	<script type="text/javascript" src="./assets/js/index.js""></script>
+</body>
+</html>
+
+
+<!-- 
+accessbility web -> khả năng truy cập
+cdn -> content delivery network -> bên thứ 3 -> giúp để chia tải resource web
+- caching -> first load -> 5s, next load -> 0.5ms
+- giảm tải load resource cho web của mình
+
+your web
+ - 10 js
+ - tailwindcss -> local
+ - tailwindcss -> cdn
+
+
+desktop first
+- code css for desktop
+- responsive for mobile
+	media max-width: 640px
+	media max-width: 768px
+	media max-width: 640px
+	media max-width: 768px
+
+mobile first
+- code css for mobile
+- responsive for desktop
+	media min-width: 640px
+	media min-width: 768px
+	media min-width: 640px
+	media min-width: 768px
+
+responsive design 
+	- desginer only UI desktop
+	- dev responsive mobile 
+
+apdater design
+ - desginer UI desktop, UI mobile, UI tablet
+ - dev code 
+
+-->
