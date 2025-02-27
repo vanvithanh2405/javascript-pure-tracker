@@ -55,6 +55,35 @@
 			</form>
 		</div>
 
+		<div class="main-feature">
+			<div class="main-feature-group">
+				<div class="list-feature-search-field">
+				<h2 class="list-name">List Issue</h2>
+				<input type="input" id="search-box" class="search-box" placeholder="Search by description" autocomplete="off">
+				</div>
+			</div>
+			<div class="main-feature-group">
+				<div class="list-feature-filter">
+				<label for="" class="feature-label">Filter:</label>
+				<div class="group-btn">
+					<button id="all-status" value="all" class="btn filter-status-btn--all"> All </button>
+					<button id="open-status" value="open" class="btn filter-status-btn--open"> Open </button>
+					<button id="close-status" value="close" class="btn filter-status-btn--close"> Close </button>
+				</div>
+				</div>
+			</div>
+			<div class="main-feature-group">
+				<div class="list-feature-sort">
+				<label for="" class="feature-label">Order By:</label>
+				<select name="" id="sort-value">
+					<option value="">Choose...</option>
+					<option value="asc">ASC</option>
+					<option value="desc">DESC</option>
+				</select>
+				</div>
+			</div>
+		</div>
+
 		<div id="trackerList"></div>
 	</div>
 

@@ -4,8 +4,19 @@ const trackerForm = document.getElementById('trackerForm');
 const descriptionInput = document.getElementById('description');
 const authorInput = document.getElementById('author');
 const seveirtyInput = document.getElementById('severity');
+const searchInput = document.getElementById("search-box");
+const sortValue = document.getElementById('sort-value');
+const filterAllBtn = document.getElementById('all-status');
+const filterOpenBtn = document.getElementById("open-status");
+const filterCloseBtn = document.getElementById("close-status");
 
-const trackers = [];
+
+
+
+let trackers = [];
+let statusText = 'Close'  
+let currentFilter = "all"; // Ban đầu hiển thị tất cả
+
 
 function renderTrackerList(dataSource = []) {
   console.log('dataSource: ', dataSource);
@@ -84,7 +95,19 @@ function renderTrackerList(dataSource = []) {
     deleteBtnElement.onclick = () => deleteTracker(tracker.id);
     deleteBtnElement.innerHTML = 'Delete';
 
+     const statusButton = document.createElement("button");
+     statusButton.setAttribute("id", "statusButton");
+     statusButton.setAttribute("type", "button");
+     statusButton.setAttribute(
+       "class",
+       "cursor-pointer focus:outline-none text-white bg-blue-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 mr-3"
+     );
+     statusButton.innerHTML = statusText;
+    statusButton.onclick=()  => updateStatus(tracker.id);
+
+    buttonContainer.appendChild(statusButton); 
     buttonContainer.appendChild(deleteBtnElement);
+
 
     rowElement.appendChild(headerElement);
     rowElement.appendChild(descriptionContainer);
@@ -95,10 +118,52 @@ function renderTrackerList(dataSource = []) {
 }
 
 // delete tracker
+// function deleteTracker(trackerId) {
+//   const trackerFiltered = trackers.filter(tracker => tracker.id !== trackerId);
+//   renderTrackerList(trackerFiltered)
+// }
 function deleteTracker(trackerId) {
-  const trackerFiltered = trackers.filter(tracker => tracker.id !== trackerId);
-  renderTrackerList(trackerFiltered)
+  // Cập nhật lại biến trackers với danh sách đã lọc
+  trackers = trackers.filter((tracker) => tracker.id !== trackerId);
+
+  // Gọi hàm render với danh sách trackers mới
+  renderTrackerList(trackers);
 }
+
+//search by description
+function searchDesc(){
+  const searchItem = searchInput.value.toLowerCase();
+  const filteredTrackers = trackers.filter((tracker) =>
+    tracker.description.toLowerCase().includes(searchItem)
+  );
+  renderTrackerList(filteredTrackers);
+}
+
+//update status
+ function updateStatus(trackerId) {
+   let trackerIndex = trackers.findIndex((tracker) => tracker.id === trackerId);
+
+   if (trackerIndex !== -1) {
+     trackers[trackerIndex].status =
+       trackers[trackerIndex].status === "open" ? "close" : "open";
+
+     if (currentFilter === "close") {
+       filterClose();
+     } else if (currentFilter === "open") {
+       filterOpen();
+     } else {
+       renderTrackerList(trackers);
+     }
+   }
+ }
+
+
+
+
+searchInput.addEventListener("input", searchDesc);
+
+
+
 
 // create tracker
 trackerForm.addEventListener('submit', function(e) {
@@ -106,15 +171,49 @@ trackerForm.addEventListener('submit', function(e) {
   const description = descriptionInput.value;
   const author = authorInput.value;
   const severity = seveirtyInput.value;
-
   const trackerItem = {
     id: Date.now(),
     author,
     description,
     severity,
-    status: 'new'
+    status: 'open'
   }
 
   trackers.push(trackerItem);
   renderTrackerList(trackers);
 })
+
+//order by description
+sortValue.addEventListener('change', function(){
+  const sortOption = sortValue.value;
+
+
+  if(sortOption === 'asc'){
+    trackers.sort((a,b) => a.description > b.description ? 1 : -1)
+  }
+  else {
+   trackers.sort((a, b) => (a.description < b.description ? 1 : -1));
+  }
+  renderTrackerList(trackers)
+})
+
+//filter All/Open/Close
+filterAllBtn.addEventListener("click", function () {
+  renderTrackerList(trackers);
+});
+
+filterOpenBtn.addEventListener("click", function () {
+    filterByStatus("open");
+
+});
+
+filterCloseBtn.addEventListener("click", function () {
+  filterByStatus('close');
+});
+
+function filterByStatus(status){
+  const filterStatus = trackers.filter((tracker)=> tracker.status === status);
+  renderTrackerList(filterStatus);
+}
+
+
