@@ -103,7 +103,9 @@ function renderTrackerList(dataSource = []) {
     statusButton.setAttribute("type", "button");
     statusButton.setAttribute(
       "class",
-      "cursor-pointer focus:outline-none text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 mr-3"
+      `cursor-pointer focus:outline-none text-white ${
+        tracker.status === "close" ? "bg-green-700 hover:bg-green-800" : "bg-blue-700 hover:bg-blue-800" 
+      } focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 mr-3`
     );
     statusButton.innerHTML = tracker.status === "open" ? "Close" : "Open";
     statusButton.onclick = () => updateStatus(tracker.id);
