@@ -1,0 +1,7 @@
+- step 1: render UI with mock data
+- step 2: 
+  - add item when submit
+  - check validate form
+- step 3: search item
+- step 4: delete item
+- step 5: order by ...

@@ -4,8 +4,19 @@ const trackerForm = document.getElementById('trackerForm');
 const descriptionInput = document.getElementById('description');
 const authorInput = document.getElementById('author');
 const seveirtyInput = document.getElementById('severity');
+const searchInput = document.getElementById("search-box");
+const sortValue = document.getElementById('sort-value');
+const filterAllBtn = document.getElementById('all-status');
+const filterNewBtn = document.getElementById("new-status");
+const filterCloseBtn = document.getElementById("close-status");
 
-const trackers = [];
+// pure function, mutate/immutate
+//  config
+const STATUS_NEW = 'new';
+const STATUS_CLOSE = 'close';
+
+let trackers = [];
+let currentFilter = "all";
 
 function renderTrackerList(dataSource = []) {
   console.log('dataSource: ', dataSource);
@@ -24,7 +35,7 @@ function renderTrackerList(dataSource = []) {
     const imgElement = document.createElement('img');
     imgElement.setAttribute('id', 'imgElement');
     imgElement.setAttribute('src', 'https://placehold.co/48x48');
-    imgElement.setAttribute('class', 'w-12 h-12 rounded-full');
+    imgElement.setAttribute('class', 'w-20 h-20 rounded-full');
     imgElement.setAttribute('alt', 'user');
 
     const authorElement = document.createElement('div');
@@ -36,12 +47,17 @@ function renderTrackerList(dataSource = []) {
     statusElement.setAttribute('id', 'statusElement');
     statusElement.setAttribute('class', 'flex items-center text-sm font-medium text-gray-900 me-3');
 
-    const iconElement = document.createElement('span');
-    iconElement.setAttribute('id', 'iconElement');
-    iconElement.setAttribute('class', 'flex w-2.5 h-2.5 bg-blue-600 rounded-full me-1.5 shrink-0');
+    const iconElement = document.createElement("span");
+    iconElement.setAttribute("id", "iconElement");
+    iconElement.setAttribute(
+      "class",
+      `flex w-2.5 h-2.5 ${tracker.status === "new" ? "bg-green-600" : "bg-gray-400"
+      } rounded-full me-1.5 shrink-0`
+    );
+
 
     const textStatusElement = document.createElement('span');
-    textStatusElement.innerHTML = tracker.status
+    textStatusElement.innerHTML = tracker.status === 'new' ? 'New' : 'Close';
 
     statusElement.appendChild(iconElement);
     statusElement.appendChild(textStatusElement)
@@ -65,7 +81,7 @@ function renderTrackerList(dataSource = []) {
 
     const textTagElement = document.createElement('div');
     textTagElement.setAttribute('id', 'textTagElement');
-    textTagElement.setAttribute('class', 'py-2 px-4 text-xs leading-3 text-indigo-700 rounded-full bg-indigo-100');
+    textTagElement.setAttribute('class', 'py-5 px-10 text-xs leading-3 text-indigo-700 rounded-full bg-indigo-100');
     textTagElement.innerHTML = tracker.severity;
 
     tagElementContainer.appendChild(textTagElement);
@@ -84,7 +100,19 @@ function renderTrackerList(dataSource = []) {
     deleteBtnElement.onclick = () => deleteTracker(tracker.id);
     deleteBtnElement.innerHTML = 'Delete';
 
+    const statusButton = document.createElement("button");
+    statusButton.setAttribute("id", "statusButton");
+    statusButton.setAttribute("type", "button");
+    statusButton.setAttribute(
+      "class",
+      "cursor-pointer focus:outline-none text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 mr-3"
+    );
+    statusButton.innerHTML = tracker.status === "new" ? "Close" : "New";
+    statusButton.onclick = () => updateStatus(tracker.id);
+
+    buttonContainer.appendChild(statusButton);
     buttonContainer.appendChild(deleteBtnElement);
+
 
     rowElement.appendChild(headerElement);
     rowElement.appendChild(descriptionContainer);
@@ -95,18 +123,60 @@ function renderTrackerList(dataSource = []) {
 }
 
 // delete tracker
+// function deleteTracker(trackerId) {
+//   const trackerFiltered = trackers.filter(tracker => tracker.id !== trackerId);
+//   renderTrackerList(trackerFiltered)
+// }
 function deleteTracker(trackerId) {
-  const trackerFiltered = trackers.filter(tracker => tracker.id !== trackerId);
-  renderTrackerList(trackerFiltered)
+  // Cập nhật lại biến trackers với danh sách đã lọc
+  const trackersFiltered = trackers.filter((tracker) => tracker.id !== trackerId);
+
+  // Gọi hàm render với danh sách trackers mới
+  renderTrackerList(trackersFiltered);
 }
 
+//search by description
+function searchDesc() {
+  const searchItem = searchInput.value.toLowerCase();
+  const filteredTrackers = trackers.filter((tracker) =>
+    tracker.description.toLowerCase().includes(searchItem)
+  );
+  renderTrackerList(filteredTrackers);
+}
+
+//update status
+// objA = {}, objB = objA. objB.name = 'abc', objA = { name: 'abc' }
+function updateStatus(trackerId) {
+  const clonedTracker = JSON.parse(JSON.stringify(trackers)); // deep clone
+  const trackerIndex = clonedTracker.findIndex((tracker) => tracker.id === trackerId);
+
+  // return early
+  if (trackerIndex === -1) return;
+
+  clonedTracker[trackerIndex].status = clonedTracker[trackerIndex].status === "new" ? "close" : "new";
+  trackers = clonedTracker;
+
+  if (currentFilter === "close") {
+    filterByStatus("close");
+    return;
+  } 
+  
+  if (currentFilter === "new") {
+    filterByStatus("new");
+    return;
+  }
+  
+  renderTrackerList(clonedTracker);
+}
+
+searchInput.addEventListener("input", searchDesc);
+
 // create tracker
-trackerForm.addEventListener('submit', function(e) {
+trackerForm.addEventListener('submit', function (e) {
   e.preventDefault();
   const description = descriptionInput.value;
   const author = authorInput.value;
   const severity = seveirtyInput.value;
-
   const trackerItem = {
     id: Date.now(),
     author,
@@ -118,3 +188,63 @@ trackerForm.addEventListener('submit', function(e) {
   trackers.push(trackerItem);
   renderTrackerList(trackers);
 })
+
+//order by description
+function compareValue(a, b, sortOption) {
+  if (sortOption === 'asc') { 
+    return a.description > b.description ? 1 : -1;
+  }
+  return a.description > b.description ? -1 : 1;
+}
+sortValue.addEventListener('change', function () {
+  const sortOption = sortValue.value;
+  const clonedTracker = JSON.parse(JSON.stringify(trackers)); // deep clone 
+  clonedTracker.sort((a, b) => compareValue(a, b, sortOption));
+  renderTrackerList(clonedTracker);
+})
+
+//filter All/Open/Close
+filterAllBtn.addEventListener("click", function () {
+  currentFilter = 'all';
+  filterByStatus("all");
+});
+
+filterNewBtn.addEventListener("click", function () {
+  currentFilter = 'new';
+  filterByStatus("new");
+});
+
+filterCloseBtn.addEventListener("click", function () {
+  currentFilter = 'close';
+  filterByStatus('close');
+});
+
+function filterByStatus(status) {
+  console.log('filter by status: ', {
+    trackers
+  })
+  const filterStatus = trackers.filter((tracker) => {
+    if(status === 'all') return tracker;
+    return tracker.status === status
+  });
+
+  filterAllBtn.style.opacity = 0.7;
+  filterNewBtn.style.opacity = 0.7;
+  filterCloseBtn.style.opacity = 0.7;
+
+  switch (status) {
+    case 'new': {
+      filterNewBtn.style.opacity = 1;
+      break;
+    }
+    case 'close' :{
+      filterCloseBtn.style.opacity = 1;
+      break;
+    }
+    default: {
+      filterAllBtn.style.opacity = 1;
+      break
+    }
+  }
+  renderTrackerList(filterStatus);
+}
