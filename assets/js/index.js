@@ -7,11 +7,13 @@ const seveirtyInput = document.getElementById('severity');
 const searchInput = document.getElementById("search-box");
 const sortValue = document.getElementById('sort-value');
 const filterAllBtn = document.getElementById('all-status');
-const filterOpenBtn = document.getElementById("open-status");
+const filterNewBtn = document.getElementById("new-status");
 const filterCloseBtn = document.getElementById("close-status");
 
-
-
+// pure function, mutate/immutate
+//  config
+const STATUS_NEW = 'new';
+const STATUS_CLOSE = 'close';
 
 let trackers = [];
 let currentFilter = "all";
@@ -49,13 +51,13 @@ function renderTrackerList(dataSource = []) {
     iconElement.setAttribute("id", "iconElement");
     iconElement.setAttribute(
       "class",
-      `flex w-2.5 h-2.5 ${tracker.status === "open" ? "bg-green-600" : "bg-gray-400"
+      `flex w-2.5 h-2.5 ${tracker.status === "new" ? "bg-green-600" : "bg-gray-400"
       } rounded-full me-1.5 shrink-0`
     );
 
 
     const textStatusElement = document.createElement('span');
-    textStatusElement.innerHTML = tracker.status === 'open' ? 'New' : 'Close';
+    textStatusElement.innerHTML = tracker.status === 'new' ? 'New' : 'Close';
 
     statusElement.appendChild(iconElement);
     statusElement.appendChild(textStatusElement)
@@ -105,7 +107,7 @@ function renderTrackerList(dataSource = []) {
       "class",
       "cursor-pointer focus:outline-none text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 mr-3"
     );
-    statusButton.innerHTML = tracker.status === "open" ? "Close" : "Open";
+    statusButton.innerHTML = tracker.status === "new" ? "Close" : "New";
     statusButton.onclick = () => updateStatus(tracker.id);
 
     buttonContainer.appendChild(statusButton);
@@ -127,10 +129,10 @@ function renderTrackerList(dataSource = []) {
 // }
 function deleteTracker(trackerId) {
   // Cập nhật lại biến trackers với danh sách đã lọc
-  trackers = trackers.filter((tracker) => tracker.id !== trackerId);
+  const trackersFiltered = trackers.filter((tracker) => tracker.id !== trackerId);
 
   // Gọi hàm render với danh sách trackers mới
-  renderTrackerList(trackers);
+  renderTrackerList(trackersFiltered);
 }
 
 //search by description
@@ -143,20 +145,28 @@ function searchDesc() {
 }
 
 //update status
+// objA = {}, objB = objA. objB.name = 'abc', objA = { name: 'abc' }
 function updateStatus(trackerId) {
-  let trackerIndex = trackers.findIndex((tracker) => tracker.id === trackerId);
+  const clonedTracker = JSON.parse(JSON.stringify(trackers)); // deep clone
+  const trackerIndex = clonedTracker.findIndex((tracker) => tracker.id === trackerId);
 
-  if (trackerIndex !== -1) {
-    trackers[trackerIndex].status = trackers[trackerIndex].status === "open" ? "close" : "open";
+  // return early
+  if (trackerIndex === -1) return;
 
-    if (currentFilter === "close") {
-      filterByStatus("close");
-    } else if (currentFilter === "open") {
-      filterByStatus("open");
-    } else {
-      renderTrackerList(trackers);
-    }
+  clonedTracker[trackerIndex].status = clonedTracker[trackerIndex].status === "new" ? "close" : "new";
+  trackers = clonedTracker;
+
+  if (currentFilter === "close") {
+    filterByStatus("close");
+    return;
+  } 
+  
+  if (currentFilter === "new") {
+    filterByStatus("new");
+    return;
   }
+  
+  renderTrackerList(clonedTracker);
 }
 
 searchInput.addEventListener("input", searchDesc);
@@ -172,7 +182,7 @@ trackerForm.addEventListener('submit', function (e) {
     author,
     description,
     severity,
-    status: 'open'
+    status: 'new'
   }
 
   trackers.push(trackerItem);
@@ -180,36 +190,61 @@ trackerForm.addEventListener('submit', function (e) {
 })
 
 //order by description
+function compareValue(a, b, sortOption) {
+  if (sortOption === 'asc') { 
+    return a.description > b.description ? 1 : -1;
+  }
+  return a.description > b.description ? -1 : 1;
+}
 sortValue.addEventListener('change', function () {
   const sortOption = sortValue.value;
-
-
-  if (sortOption === 'asc') {
-    trackers.sort((a, b) => a.description > b.description ? 1 : -1)
-  }
-  else {
-    trackers.sort((a, b) => (a.description < b.description ? 1 : -1));
-  }
-  renderTrackerList(trackers)
+  const clonedTracker = JSON.parse(JSON.stringify(trackers)); // deep clone 
+  clonedTracker.sort((a, b) => compareValue(a, b, sortOption));
+  renderTrackerList(clonedTracker);
 })
 
 //filter All/Open/Close
 filterAllBtn.addEventListener("click", function () {
-  renderTrackerList(trackers);
+  currentFilter = 'all';
+  filterByStatus("all");
 });
 
-filterOpenBtn.addEventListener("click", function () {
-  filterByStatus("open");
-
+filterNewBtn.addEventListener("click", function () {
+  currentFilter = 'new';
+  filterByStatus("new");
 });
 
 filterCloseBtn.addEventListener("click", function () {
+  currentFilter = 'close';
   filterByStatus('close');
 });
 
 function filterByStatus(status) {
-  const filterStatus = trackers.filter((tracker) => tracker.status === status);
+  console.log('filter by status: ', {
+    trackers
+  })
+  const filterStatus = trackers.filter((tracker) => {
+    if(status === 'all') return tracker;
+    return tracker.status === status
+  });
+
+  filterAllBtn.style.opacity = 0.7;
+  filterNewBtn.style.opacity = 0.7;
+  filterCloseBtn.style.opacity = 0.7;
+
+  switch (status) {
+    case 'new': {
+      filterNewBtn.style.opacity = 1;
+      break;
+    }
+    case 'close' :{
+      filterCloseBtn.style.opacity = 1;
+      break;
+    }
+    default: {
+      filterAllBtn.style.opacity = 1;
+      break
+    }
+  }
   renderTrackerList(filterStatus);
 }
-
-
