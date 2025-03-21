@@ -17,7 +17,7 @@ const STATUS_CLOSE = 'close';
 
 let currentFilter = "all";
 const TRACKER_DATA = 'tkdt';
-let trackers = localStorage.getItem(TRACKER_DATA) ? JSON.parse(localStorage.getItem(TRACKER_DATA)) : [];
+let trackers = localStorage.getItem(TRACKER_DATA) || [];
 
 function renderTrackerList(dataSource) {
   // reset trackerList
