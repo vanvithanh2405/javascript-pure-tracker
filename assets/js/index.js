@@ -15,11 +15,11 @@ const filterCloseBtn = document.getElementById("close-status");
 const STATUS_NEW = 'new';
 const STATUS_CLOSE = 'close';
 
-let trackers = [];
 let currentFilter = "all";
+const TRACKER_DATA = 'trdt';
+let trackers = localStorage.getItem(TRACKER_DATA) ? JSON.parse(localStorage.getItem(TRACKER_DATA)) : [];
 
-function renderTrackerList(dataSource = []) {
-  console.log('dataSource: ', dataSource);
+function renderTrackerList(dataSource) {
   // reset trackerList
   trackerList.innerHTML = '';
 
@@ -130,9 +130,10 @@ function renderTrackerList(dataSource = []) {
 function deleteTracker(trackerId) {
   // Cập nhật lại biến trackers với danh sách đã lọc
   const trackersFiltered = trackers.filter((tracker) => tracker.id !== trackerId);
-
+  trackers = trackersFiltered
   // Gọi hàm render với danh sách trackers mới
-  renderTrackerList(trackersFiltered);
+  localStorage.setItem(TRACKER_DATA, JSON.stringify(trackers));
+  renderTrackerList(trackers);
 }
 
 //search by description
@@ -159,13 +160,13 @@ function updateStatus(trackerId) {
   if (currentFilter === "close") {
     filterByStatus("close");
     return;
-  } 
-  
+  }
+
   if (currentFilter === "new") {
     filterByStatus("new");
     return;
   }
-  
+  localStorage.setItem(TRACKER_DATA, JSON.stringify(trackers));
   renderTrackerList(clonedTracker);
 }
 
@@ -184,14 +185,14 @@ trackerForm.addEventListener('submit', function (e) {
     severity,
     status: 'new'
   }
-
   trackers.push(trackerItem);
+  localStorage.setItem(TRACKER_DATA, JSON.stringify(trackers));
   renderTrackerList(trackers);
 })
 
 //order by description
 function compareValue(a, b, sortOption) {
-  if (sortOption === 'asc') { 
+  if (sortOption === 'asc') {
     return a.description > b.description ? 1 : -1;
   }
   return a.description > b.description ? -1 : 1;
@@ -224,7 +225,7 @@ function filterByStatus(status) {
     trackers
   })
   const filterStatus = trackers.filter((tracker) => {
-    if(status === 'all') return tracker;
+    if (status === 'all') return tracker;
     return tracker.status === status
   });
 
@@ -237,7 +238,7 @@ function filterByStatus(status) {
       filterNewBtn.style.opacity = 1;
       break;
     }
-    case 'close' :{
+    case 'close': {
       filterCloseBtn.style.opacity = 1;
       break;
     }
@@ -248,3 +249,5 @@ function filterByStatus(status) {
   }
   renderTrackerList(filterStatus);
 }
+
+renderTrackerList(trackers)
